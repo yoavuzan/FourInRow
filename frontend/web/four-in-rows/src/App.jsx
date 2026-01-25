@@ -1,22 +1,71 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
-const NUM_ROWS = 6;
-const NUM_COLS = 7;
+const API_URL = 'http://localhost:8000';
 
 const App = () => {
-  // Placeholder board for rendering - actual state will come from backend
-  const board = Array(NUM_ROWS).fill(Array(NUM_COLS).fill(null));
+  const [board, setBoard] = useState([]);
+  const [currentPlayer, setCurrentPlayer] = useState('');
+  const [gameOver, setGameOver] = useState(false);
+  const [winner, setWinner] = useState(null);
 
-  const handleCellClick = (col) => {
-    console.log(`Cell clicked in column: ${col}. This action will be sent to the backend.`);
-    // In a real application, this would send an API request to the backend
-    // e.g., fetch('/move', { method: 'POST', body: JSON.stringify({ col }) });
+  const fetchGameState = async () => {
+    try {
+      const response = await fetch(`${API_URL}/game`);
+      const data = await response.json();
+      setBoard(data.board);
+      setCurrentPlayer(data.currentPlayer);
+      setGameOver(data.gameOver);
+      setWinner(data.winner);
+    } catch (error) {
+      console.error("Error fetching game state:", error);
+    }
   };
 
-  const handleReset = () => {
-    console.log("Reset button clicked. This action will be sent to the backend.");
-    // In a real application, this would send an API request to the backend to reset the game
+  useEffect(() => {
+    fetchGameState();
+  }, []);
+
+  const handleCellClick = async (col) => {
+    if (gameOver) return;
+
+    try {
+      const response = await fetch(`${API_URL}/game/move`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ col }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setBoard(data.board);
+        setCurrentPlayer(data.currentPlayer);
+        setGameOver(data.gameOver);
+        setWinner(data.winner);
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error("Error making move:", error);
+    }
+  };
+
+  const handleReset = async () => {
+    try {
+      const response = await fetch(`${API_URL}/game/reset`, { method: 'POST' });
+      const data = await response.json();
+      setBoard(data.board);
+      setCurrentPlayer(data.currentPlayer);
+      setGameOver(data.gameOver);
+      setWinner(data.winner);
+    } catch (error) {
+      console.error("Error resetting game:", error);
+    }
+  };
+
+  const getPlayerClass = (cell) => {
+    if (cell === 'X') return 'player-1';
+    if (cell === 'O') return 'player-2';
+    return '';
   };
 
   return (
@@ -28,20 +77,28 @@ const App = () => {
             {row.map((cell, colIndex) => (
               <div
                 key={colIndex}
-                className={`cell ${cell ? `filled ${cell.toLowerCase().replace(' ', '-')}` : ''}`}
+                className={`cell ${cell ? `filled ${getPlayerClass(cell)}` : ''}`}
                 onClick={() => handleCellClick(colIndex)}
               />
             ))}
           </div>
         ))}
       </div>
-      <div className="status">
-        <h2>Current Player: (Backend determines)</h2>
-        <p>Game Status: (Backend determines)</p>
-      </div>
-       <button onClick={handleReset}>Reset Game</button>
+      {gameOver && (
+        <div className="game-over">
+          <h2>{winner ? (winner === 'Draw' ? "It's a draw!" : `${winner} wins!`) : ''}</h2>
+          <button onClick={handleReset}>Play Again</button>
+        </div>
+      )}
+      {!gameOver && (
+        <div className="status">
+          <h2>Current Player: {currentPlayer}</h2>
+        </div>
+      )}
+      <button onClick={handleReset}>Reset Game</button>
     </div>
   );
 };
 
 export default App;
+

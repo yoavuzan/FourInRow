@@ -4,17 +4,17 @@ class Board:
     def __init__(self, rows=6, cols=7):
         self.rows = rows
         self.cols = cols
-        self.board = np.full((rows, cols), "|_|")
+        self.board = np.full((rows, cols), None)
 
     def drop_piece(self, row, col, piece):
         self.board[row][col] = piece
 
     def is_valid_location(self, col):
-        return self.board[self.rows - 1][col] == "|_|"
+        return self.board[self.rows - 1][col] == None
 
     def get_next_open_row(self, col):
         for r in range(self.rows):
-            if self.board[r][col] == "|_|":
+            if self.board[r][col] == None:
                 return r
         return None  # Should not happen if is_valid_location is checked
 
@@ -49,4 +49,4 @@ class Board:
         print(np.flip(self.board, 0))
 
     def is_full(self):
-        return not (self.board == "|_|").any()
+        return not (self.board == None).any()
