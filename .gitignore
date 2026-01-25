@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.mypy_cache/
+venv/
+.venv/
+
+# Node.js
+node_modules/
+build/ # For React build output
+
+# IDEs
+.vscode/
+.idea/
+
+# Gemini temp files
+.gemini/tmp/
+#Gemini.md
+*.md
