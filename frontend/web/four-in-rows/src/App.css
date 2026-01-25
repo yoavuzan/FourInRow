@@ -1,0 +1,79 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background-color: #282c34;
+  color: white;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(7, 60px); /* 7 columns */
+  grid-template-rows: repeat(6, 60px); /* 6 rows */
+  border: 5px solid #007bff;
+  background-color: #007bff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.row {
+  display: contents; /* Allows cells to be direct children of the grid */
+}
+
+.cell {
+  width: 60px;
+  height: 60px;
+  background-color: #ffffff; /* Empty cell color */
+  border-radius: 50%; /* Make them circular */
+  margin: 5px; /* Spacing between cells */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cell.filled {
+  background-color: transparent; /* Filled cells will have colored discs */
+}
+
+.cell.filled.player-1 {
+  background-color: red;
+}
+
+.cell.filled.player-2 {
+  background-color: yellow;
+}
+
+.cell:hover {
+  background-color: #f0f0f0; /* Hover effect for empty cells */
+}
+
+.status {
+  margin-top: 20px;
+  font-size: 1.2em;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #218838;
+}
