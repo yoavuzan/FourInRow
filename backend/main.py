@@ -9,7 +9,8 @@ app = FastAPI()
 
 # CORS configuration
 origins = [
-    "http://localhost:5173",  # React frontend
+    "http://localhost:5173", 
+    "https://four-in-row-pi.vercel.app"
 ]
 
 app.add_middleware(
