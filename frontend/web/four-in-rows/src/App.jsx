@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 
-const socket = new WebSocket("ws:///ws/game");
+const socket = new WebSocket("wss://four-in-row-pi.vercel.app/ws/game");
 
 const App = () => {
   const [board, setBoard] = useState([]);
