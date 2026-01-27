@@ -27,6 +27,8 @@ async def websocket_endpoint(websocket: WebSocket):
     if not connected:
         return
 
+    role = manager.get_role(websocket)
+    print(f"Player with role {role} connected.")
     try:
         while True:
             data = await websocket.receive_json()
@@ -51,7 +53,11 @@ async def websocket_endpoint(websocket: WebSocket):
                     "board": game.get_board_display().tolist(),
                     "currentPlayer": game.get_current_player().name,
                     "gameOver": game.game_over,
-                    "winner": game.get_winner(),
+                    "winner": game.get_current_player().name
+                    if game.game_over and not game.board.is_full()
+                    else "Draw"
+                    if game.board.is_full()
+                    else None,
                 }
                 await manager.broadcast(response)
 
@@ -68,6 +74,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
 
 @app.get("/")
 def read_root():
