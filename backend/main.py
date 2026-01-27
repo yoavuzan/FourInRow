@@ -36,7 +36,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             if action == "move":
                 player_role = manager.get_role(websocket)
-                # בדיקה אם זה התור שלו
+
                 if player_role != game.get_current_player().name:
                     await websocket.send_json(
                         {"success": False, "message": "Not your turn!"}
@@ -73,7 +73,14 @@ async def websocket_endpoint(websocket: WebSocket):
                 await manager.broadcast(response)
 
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
+        role_left = manager.disconnect(websocket)
+        game.reset()
+        await manager.broadcast(
+            {
+                "type": "error",
+                "message": f"Player {role_left} left the game. Board reset.",
+            }
+        )
 
 
 @app.get("/")

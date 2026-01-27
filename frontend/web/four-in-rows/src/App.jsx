@@ -6,7 +6,7 @@ const App = () => {
   const [currentPlayer, setCurrentPlayer] = useState("");
   const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState(null);
-  const [myRole, setMyRole] = useState(""); 
+  const [myRole, setMyRole] = useState("");
   const socketRef = useRef(null);
 
   useEffect(() => {
@@ -33,13 +33,19 @@ const App = () => {
     socket.onerror = (error) => console.error("WebSocket error:", error);
 
     return () => {
-      socket.close();
+      if (
+        socket.readyState === WebSocket.OPEN ||
+        socket.readyState === WebSocket.CONNECTING
+      ) {
+        socket.close();
+        console.log("Cleanup: Closing WebSocket");
+      }
     };
   }, []);
 
   const handleCellClick = (col) => {
     if (gameOver) return;
-    if (currentPlayer !== myRole) return; 
+    if (currentPlayer !== myRole) return;
     socketRef.current.send(JSON.stringify({ action: "move", col }));
   };
 
@@ -65,7 +71,9 @@ const App = () => {
             {row.map((cell, colIndex) => (
               <div
                 key={colIndex}
-                className={`cell ${cell ? `filled ${getPlayerClass(cell)}` : ""}`}
+                className={`cell ${
+                  cell ? `filled ${getPlayerClass(cell)}` : ""
+                }`}
                 onClick={() => handleCellClick(colIndex)}
               />
             ))}
