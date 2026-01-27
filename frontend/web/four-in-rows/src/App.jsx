@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
-
+import React, { useState, useEffect } from "react";
+import "./App.css";
 
 const socket = new WebSocket("wss://four-in-row.onrender.com/ws/game");
 
 const App = () => {
   const [board, setBoard] = useState([]);
-  const [currentPlayer, setCurrentPlayer] = useState('');
+  const [currentPlayer, setCurrentPlayer] = useState("");
   const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState(null);
 
@@ -35,17 +34,17 @@ const App = () => {
 
   const handleCellClick = (col) => {
     if (gameOver) return;
-    socket.send(JSON.stringify({ action: 'move', col }));
+    socket.send(JSON.stringify({ action: "move", col }));
   };
 
   const handleReset = () => {
-    socket.send(JSON.stringify({ action: 'reset' }));
+    socket.send(JSON.stringify({ action: "reset" }));
   };
 
   const getPlayerClass = (cell) => {
-    if (cell === 'X') return 'player-1';
-    if (cell === 'O') return 'player-2';
-    return '';
+    if (cell === "X") return "player-1";
+    if (cell === "O") return "player-2";
+    return "";
   };
 
   return (
@@ -57,7 +56,9 @@ const App = () => {
             {row.map((cell, colIndex) => (
               <div
                 key={colIndex}
-                className={`cell ${cell ? `filled ${getPlayerClass(cell)}` : ''}`}
+                className={`cell ${
+                  cell ? `filled ${getPlayerClass(cell)}` : ""
+                }`}
                 onClick={() => handleCellClick(colIndex)}
               />
             ))}
@@ -66,7 +67,13 @@ const App = () => {
       </div>
       {gameOver && (
         <div className="game-over">
-          <h2>{winner ? (winner === 'Draw' ? "It's a draw!" : `${winner} wins!`) : ''}</h2>
+          <h2>
+            {winner
+              ? winner === "Draw"
+                ? "It's a draw!"
+                : `${winner} wins!`
+              : ""}
+          </h2>
           <button onClick={handleReset}>Play Again</button>
         </div>
       )}
@@ -81,6 +88,3 @@ const App = () => {
 };
 
 export default App;
-
-
-
