@@ -8,6 +8,8 @@ class TwoPlayerManager:
 
     async def connect(self, websocket: WebSocket):
         if len(self.players) >= 2:
+            await websocket.accept()
+            await websocket.send_json({"type": "error", "message": "Full"})
             await websocket.close(code=1008)
             return False
 
@@ -34,5 +36,8 @@ class TwoPlayerManager:
         return self.roles.get(websocket)
 
     async def broadcast(self, message: dict):
-        for player in self.players:
-            await player.send_json(message)
+         for player in self.players[:]:
+            try:
+                await player.send_json(message)
+            except Exception:
+                self.disconnect(player)

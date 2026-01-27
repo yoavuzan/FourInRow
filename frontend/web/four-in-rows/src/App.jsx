@@ -3,7 +3,7 @@ import "./App.css";
 
 const App = () => {
   const [board, setBoard] = useState([]);
-  const [currentPlayer, setCurrentPlayer] = useState("");
+  const [currentPlayer, setCurrentPlayer] = useState("X");
   const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState(null);
   const [myRole, setMyRole] = useState("");
@@ -14,20 +14,30 @@ const App = () => {
     socketRef.current = socket;
 
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+      try {
+        const data = JSON.parse(event.data);
 
-      if (data.type === "role") {
-        setMyRole(data.role);
-        console.log("You are player", data.role);
-        return;
+        if (data.type === "role") {
+          setMyRole(data.role);
+          return;
+        }
+
+        if (data.type === "update") {
+          // Safeguard: Only update state if data exists in the message
+          if (data.board) setBoard(data.board);
+          if (data.currentPlayer) setCurrentPlayer(data.currentPlayer);
+          if (data.gameOver !== undefined) setGameOver(data.gameOver);
+          if (data.winner !== undefined) setWinner(data.winner);
+        }
+
+        if (data.type === "error") {
+          console.error("Game Error:", data.message);
+          alert(data.message);
+        }
+      } catch (err) {
+        console.error("Error parsing message:", err);
       }
-
-      setBoard(data.board);
-      setCurrentPlayer(data.currentPlayer);
-      setGameOver(data.gameOver);
-      setWinner(data.winner);
     };
-
     socket.onopen = () => console.log("WebSocket connected");
     socket.onclose = () => console.log("WebSocket closed");
     socket.onerror = (error) => console.error("WebSocket error:", error);
@@ -44,13 +54,20 @@ const App = () => {
   }, []);
 
   const handleCellClick = (col) => {
-    if (gameOver) return;
-    if (currentPlayer !== myRole) return;
+    const isSocketReady = socketRef.current?.readyState === WebSocket.OPEN;
+
+    if (gameOver || !isSocketReady || currentPlayer !== myRole) {
+      console.log("Invalid move attempt or socket not ready");
+      return;
+    }
+
     socketRef.current.send(JSON.stringify({ action: "move", col }));
   };
 
   const handleReset = () => {
-    socketRef.current.send(JSON.stringify({ action: "reset" }));
+    if (socketRef.current?.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({ action: "reset" }));
+    }
   };
 
   const getPlayerClass = (cell) => {
