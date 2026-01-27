@@ -30,50 +30,44 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_json()
+            action = data.get("action")
 
-            if data["action"] == "move":
-                player_index = manager.players.index(websocket)
-                current_player_index = 0 if game.get_current_player().name == "X" else 1
-
-                if player_index != current_player_index:
+            if action == "move":
+                player_role = manager.get_role(websocket)
+                # בדיקה אם זה התור שלו
+                if player_role != game.get_current_player().name:
                     await websocket.send_json(
-                        {"success": False, "message": "Not your turn"}
+                        {"success": False, "message": "Not your turn!"}
                     )
                     continue
 
-                success, message = game.play_turn(data["col"])
+                col = data.get("col")
+                success, message = game.play_turn(col)
 
-                await manager.broadcast(
-                    {
-                        "type": "update",
-                        "success": success,
-                        "message": message,
-                        "board": game.get_board_display().tolist(),
-                        "currentPlayer": game.get_current_player().name,
-                        "gameOver": game.game_over,
-                        "winner": game.get_current_player().name
-                        if game.game_over and not game.board.is_full()
-                        else "Draw"
-                        if game.board.is_full()
-                        else None,
-                    }
-                )
+                response = {
+                    "type": "update",
+                    "success": success,
+                    "message": message,
+                    "board": game.get_board_display().tolist(),
+                    "currentPlayer": game.get_current_player().name,
+                    "gameOver": game.game_over,
+                    "winner": game.get_winner(),
+                }
+                await manager.broadcast(response)
 
-            elif data["action"] == "reset":
+            elif action == "reset":
                 game.reset()
-                await manager.broadcast(
-                    {
-                        "type": "update",
-                        "board": game.get_board_display().tolist(),
-                        "currentPlayer": game.get_current_player().name,
-                        "gameOver": False,
-                        "winner": None,
-                    }
-                )
+                response = {
+                    "type": "update",
+                    "board": game.get_board_display().tolist(),
+                    "currentPlayer": game.get_current_player().name,
+                    "gameOver": False,
+                    "winner": None,
+                }
+                await manager.broadcast(response)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-
 
 @app.get("/")
 def read_root():
