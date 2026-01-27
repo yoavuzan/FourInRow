@@ -1,8 +1,9 @@
 
 
 from fastapi import FastAPI
-
+from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from backend.TwoPlayerManager import TwoPlayerManager
 from backend.game import Game
 
 app = FastAPI()
@@ -21,8 +22,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+manager = TwoPlayerManager()
 game = Game()
+
+@app.websocket("/ws/game")
+async def websocket_endpoint(websocket: WebSocket):
+    connected = await manager.connect(websocket)
+    if not connected:
+        return KeyError("Connection refused: Game already has two players.")
+    try:
+        while True:
+            data = await websocket.receive_json()
+            action = data.get("action")
+            if action == "move":
+                col = data.get("col")
+                success, message = game.play_turn(col)
+                response = {
+                    "success": success,
+                    "message": message,
+                    "board": game.get_board_display().tolist(),
+                    "currentPlayer": game.get_current_player().name,
+                    "gameOver": game.game_over,
+                    "winner": game.get_current_player().name if game.game_over and not game.board.is_full() else "Draw" if game.board.is_full() else None,
+                }
+                await manager.broadcast(response)
+            elif action == "reset":
+                game.reset()
+                response = {
+                    "board": game.get_board_display().tolist(),
+                    "currentPlayer": game.get_current_player().name,
+                    "gameOver": game.game_over,
+                    "winner": None,
+                }
+                await manager.broadcast(response)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
 
 @app.get("/")
 def read_root():
@@ -54,8 +88,7 @@ def make_move(data: dict):
 
 @app.post("/game/reset")
 def reset_game():
-    global game
-    game = Game()
+    game.reset()
     return {
         "board": game.get_board_display().tolist(),
         "currentPlayer": game.get_current_player().name,

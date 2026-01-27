@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-const API_URL = 'https://fourinrow.onrender.com';
+
+const socket = new WebSocket("ws:///ws/game");
 
 const App = () => {
   const [board, setBoard] = useState([]);
@@ -9,57 +10,36 @@ const App = () => {
   const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState(null);
 
-  const fetchGameState = async () => {
-    try {
-      const response = await fetch(`${API_URL}/game`);
-      const data = await response.json();
+  useEffect(() => {
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
       setBoard(data.board);
       setCurrentPlayer(data.currentPlayer);
       setGameOver(data.gameOver);
       setWinner(data.winner);
-    } catch (error) {
-      console.error("Error fetching game state:", error);
-    }
-  };
+    };
 
-  useEffect(() => {
-    fetchGameState();
+    socket.onopen = () => {
+      console.log("WebSocket connection established");
+      // You might want to send a message to get the initial game state
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
   }, []);
 
-  const handleCellClick = async (col) => {
+  const handleCellClick = (col) => {
     if (gameOver) return;
-
-    try {
-      const response = await fetch(`${API_URL}/game/move`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ col }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setBoard(data.board);
-        setCurrentPlayer(data.currentPlayer);
-        setGameOver(data.gameOver);
-        setWinner(data.winner);
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      console.error("Error making move:", error);
-    }
+    socket.send(JSON.stringify({ action: 'move', col }));
   };
 
-  const handleReset = async () => {
-    try {
-      const response = await fetch(`${API_URL}/game/reset`, { method: 'POST' });
-      const data = await response.json();
-      setBoard(data.board);
-      setCurrentPlayer(data.currentPlayer);
-      setGameOver(data.gameOver);
-      setWinner(data.winner);
-    } catch (error) {
-      console.error("Error resetting game:", error);
-    }
+  const handleReset = () => {
+    socket.send(JSON.stringify({ action: 'reset' }));
   };
 
   const getPlayerClass = (cell) => {
@@ -101,4 +81,6 @@ const App = () => {
 };
 
 export default App;
+
+
 
