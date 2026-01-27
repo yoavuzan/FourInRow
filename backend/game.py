@@ -39,8 +39,3 @@ class Game:
     def get_board_display(self):
         # This can be enhanced for different UIs
         return self.board.board
-
-    def reset(self):
-        self.board = Board(self.board.rows, self.board.cols)
-        self.current_player_index = 0
-        self.game_over = False

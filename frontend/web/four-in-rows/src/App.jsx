@@ -39,7 +39,7 @@ const App = () => {
 
   const handleCellClick = (col) => {
     if (gameOver) return;
-    if (currentPlayer !== myRole) return; // לבדוק שזה התור שלך
+    if (currentPlayer !== myRole) return; 
     socketRef.current.send(JSON.stringify({ action: "move", col }));
   };
 
