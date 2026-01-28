@@ -10,8 +10,6 @@ class Player:
     def get_info(self):
         return {"name": self.name, "symbol": self.symbol, "score": self.score}
     
-    def get_symbol(self):
-        return self.symbol
 class AIPlayer(Player):
     def __init__(self, name, symbol, difficulty="medium", score=0):
         super().__init__(name, symbol, score)

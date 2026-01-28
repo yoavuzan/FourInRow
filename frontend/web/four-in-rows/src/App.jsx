@@ -9,7 +9,7 @@ const App = () => {
   const [myRole, setMyRole] = useState("");
   const socketRef = useRef(null);
 
-  const Url = window.location.href.includes("localhost") ? "ws://localhost:8000/ws/game" : "wss://four-in-row.onrender.com/ws/game";
+  const Url = window.location.href.includes("localhost") ? "ws://localhost:8000/ws/game" : "wss://fourinrow-production.up.railway.app/ws/game";
   useEffect(() => {
     const socket = new WebSocket(Url);
     socketRef.current = socket;
