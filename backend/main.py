@@ -3,6 +3,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from backend.TwoPlayerManager import TwoPlayerManager
 from backend.game import Game
+import uvicorn
 
 app = FastAPI()
 
@@ -33,11 +34,9 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             data = await websocket.receive_json()
             action = data.get("action")
-
             if action == "move":
-                player_role = manager.get_role(websocket)
-
-                if player_role != game.get_current_player().name:
+                player_role = manager.get_role(websocket)[0]
+                if player_role != game.get_current_player().symbol:
                     await websocket.send_json(
                         {"success": False, "message": "Not your turn!"}
                     )
