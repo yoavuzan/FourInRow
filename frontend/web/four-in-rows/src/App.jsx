@@ -9,8 +9,9 @@ const App = () => {
   const [myRole, setMyRole] = useState("");
   const socketRef = useRef(null);
 
+  const Url = window.location.href.includes("localhost") ? "ws://localhost:8000/ws/game" : "wss://four-in-row.onrender.com/ws/game";
   useEffect(() => {
-    const socket = new WebSocket("wss://four-in-row.onrender.com/ws/game");
+    const socket = new WebSocket(Url);
     socketRef.current = socket;
 
     socket.onmessage = (event) => {
@@ -54,12 +55,12 @@ const App = () => {
   }, []);
 
   const handleCellClick = (col) => {
-    const isSocketReady = socketRef.current?.readyState === WebSocket.OPEN;
+    // const isSocketReady = socketRef.current?.readyState === WebSocket.OPEN;
 
-    if (gameOver || !isSocketReady || currentPlayer !== myRole) {
-      console.log("Invalid move attempt or socket not ready");
-      return;
-    }
+    // if ( !isSocketReady || currentPlayer !== myRole) {
+    //   console.log("Invalid move attempt or socket not ready");
+    //   return;
+    // }
 
     socketRef.current.send(JSON.stringify({ action: "move", col }));
   };
