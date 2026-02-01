@@ -15,5 +15,4 @@ build/ # For React build output
 
 # Gemini temp files
 .gemini/tmp/
-#Gemini.md
-*.md
+Gemini.md

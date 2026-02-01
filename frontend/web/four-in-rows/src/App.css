@@ -15,13 +15,14 @@ h1 {
 
 .board {
   display: grid;
-  grid-template-columns: repeat(7, 60px); /* 7 columns */
-  grid-template-rows: repeat(6, 60px); /* 6 rows */
+  grid-template-columns: repeat(7, 70px); /* 7 columns */
+  grid-template-rows: repeat(6, 70px); /* 6 rows */
   border: 5px solid #007bff;
   background-color: #007bff;
   border-radius: 10px;
   overflow: hidden;
 }
+
 
 .row {
   display: contents; /* Allows cells to be direct children of the grid */
@@ -77,3 +78,6 @@ button {
 button:hover {
   background-color: #218838;
 }
+
+
+

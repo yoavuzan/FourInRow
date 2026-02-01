@@ -17,9 +17,8 @@ const App = () => {
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-
         if (data.type === "role") {
-          setMyRole(data.role);
+          setMyRole(data.role === "X" ? "Player 1" : "Player 2");
           return;
         }
 
@@ -81,10 +80,9 @@ const App = () => {
     <div className="app">
       <h1>Four in a Row</h1>
       <h3>Your Role: {myRole}</h3>
-      <h3>Current Turn: {currentPlayer}</h3>
 
       <div className="board">
-        {board.map((row, rowIndex) => (
+        {[...board].reverse().map((row, rowIndex) => (
           <div key={rowIndex} className="row">
             {row.map((cell, colIndex) => (
               <div
